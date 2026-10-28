@@ -278,7 +278,15 @@
     linkedin: "https://www.linkedin.com/in/yogendrach",
     resumeUrl: "/assets/aistudio/Yogendra_Chaudhary_CV_cc247373.pdf",
     location: "Kathmandu, Nepal",
-    phone: "9843688407"
+    phone: "9843688407",
+    sectionVisibility: {
+      header: true,
+      work: true,
+      process: true,
+      experience: true,
+      about: true,
+      footer: true
+    }
   };
 
   try {
@@ -288,11 +296,35 @@
     }
   } catch (e) {}
 
+  function applySectionVisibility() {
+    const sec = CV.sectionVisibility;
+    if (!sec) return;
+    let styleEl = document.getElementById('section-visibility-styles');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'section-visibility-styles';
+      document.head.appendChild(styleEl);
+    }
+    const rules = [];
+    if (sec.work === false) {
+      rules.push('a[href*="#work"], .framer-chfo71-container, .framer-1smjn28-container { display: none !important; }');
+    }
+    if (sec.about === false) {
+      rules.push('a[href*="#about"], .framer-10lyrh0-container { display: none !important; }');
+    }
+    if (sec.footer === false) {
+      rules.push('footer, [data-framer-name="Footer"] { display: none !important; }');
+    }
+    styleEl.textContent = rules.join('\n');
+  }
+
   let isSyncing = false;
   function syncContent() {
     if (!document || !document.body || isSyncing) return;
     isSyncing = true;
     try {
+      applySectionVisibility();
+
       // 1. Links
       document.querySelectorAll('a').forEach(a => {
         try {
@@ -383,6 +415,16 @@
 
   // Live Firebase Firestore Sync
   function connectLiveSync() {
+    // Cross-tab storage updates
+    window.addEventListener('storage', e => {
+      if (e.key === 'portfolio_content_override' && e.newValue) {
+        try {
+          Object.assign(CV, JSON.parse(e.newValue));
+          syncContent();
+        } catch(err) {}
+      }
+    });
+
     // Non-blocking background fetch
     fetch('/api/content')
       .then(res => res.ok ? res.json() : null)

@@ -6,14 +6,22 @@
       "type": "object",
       "properties": {
         "name": { "type": "string", "maxLength": 100 },
+        "heroName": { "type": "string", "maxLength": 50 },
         "title": { "type": "string", "maxLength": 150 },
-        "tagline": { "type": "string", "maxLength": 300 },
-        "bio": { "type": "string", "maxLength": 1000 },
+        "tagline": { "type": "string", "maxLength": 500 },
+        "bio": { "type": "string", "maxLength": 2000 },
         "location": { "type": "string", "maxLength": 100 },
         "email": { "type": "string", "maxLength": 120 },
         "phone": { "type": "string", "maxLength": 50 },
-        "linkedin": { "type": "string", "maxLength": 200 },
+        "linkedin": { "type": "string", "maxLength": 300 },
         "resumeUrl": { "type": "string", "maxLength": 500 },
+        "sectionVisibility": {
+          "type": "object",
+          "description": "Flags to enable or disable sections on the portfolio"
+        },
+        "projects": { "type": "array" },
+        "experience": { "type": "array" },
+        "skills": { "type": "array" },
         "updatedAt": { "type": "string", "maxLength": 60 }
       },
       "required": ["name", "title", "email"]

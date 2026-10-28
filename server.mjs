@@ -115,8 +115,42 @@ const server = createServer(async (req, res) => {
           const parsed = JSON.parse(body);
           await mkdir(resolve(root, 'data'), { recursive: true });
           await writeFile(dataFile, JSON.stringify(parsed, null, 2), 'utf8');
+
+          // Sync to Firestore database in background
+          try {
+            const cfg = JSON.parse(await readFile(resolve(root, 'firebase-applet-config.json'), 'utf8'));
+            if (cfg.apiKey && cfg.projectId && cfg.firestoreDatabaseId) {
+              const toFields = obj => {
+                const fields = {};
+                for (const [k, v] of Object.entries(obj)) {
+                  if (typeof v === 'string') fields[k] = { stringValue: v };
+                  else if (typeof v === 'boolean') fields[k] = { booleanValue: v };
+                  else if (typeof v === 'number') fields[k] = { integerValue: String(v) };
+                  else if (Array.isArray(v)) {
+                    fields[k] = {
+                      arrayValue: {
+                        values: v.map(item => ({ mapValue: { fields: toFields(item) } }))
+                      }
+                    };
+                  } else if (typeof v === 'object' && v !== null) {
+                    fields[k] = { mapValue: { fields: toFields(v) } };
+                  }
+                }
+                return fields;
+              };
+              const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/${cfg.firestoreDatabaseId}/documents/portfolio/main?key=${cfg.apiKey}`;
+              await fetch(firestoreUrl, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fields: toFields(parsed) })
+              });
+            }
+          } catch (syncErr) {
+            console.warn('Firestore server sync note:', syncErr.message);
+          }
+
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true, message: 'Content saved successfully' }));
+          res.end(JSON.stringify({ success: true, message: 'Content saved to database successfully' }));
         } catch (e) {
           res.writeHead(400, { 'Content-Type': 'application/json' }).end(JSON.stringify({ error: e.message }));
         }

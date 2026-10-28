@@ -160,7 +160,20 @@
       background: #64748b;
     }
     .status-dot.active { background: var(--success); }
+    .status-dot.saving {
+      background: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+      animation: pulseDot 0.8s ease-in-out infinite;
+    }
     .status-dot.error { background: var(--danger); }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.35; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.25); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
     .tabs {
       display: flex;
       gap: 8px;
@@ -230,7 +243,7 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
-    input, textarea, select {
+    input[type="text"], input[type="email"], input[type="url"], textarea, select {
       background: #0f1319;
       border: 1px solid var(--card-border);
       border-radius: 8px;
@@ -241,11 +254,82 @@
       transition: border-color 0.15s ease;
       width: 100%;
     }
-    input:focus, textarea:focus, select:focus {
+    input[type="text"]:focus, input[type="email"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
       outline: none;
       border-color: var(--accent);
     }
     textarea { min-height: 90px; resize: vertical; }
+    
+    /* Toggle switch styles */
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-radius: 10px;
+      background: #0f1319;
+      border: 1px solid var(--card-border);
+      margin-bottom: 12px;
+      transition: border-color 0.15s ease;
+    }
+    .switch-row:hover {
+      border-color: #334155;
+    }
+    .switch-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .switch-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .switch-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #2a3447;
+      transition: .25s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
     .item-card {
       background: #0f1319;
       border: 1px solid var(--card-border);
@@ -261,6 +345,11 @@
       margin-bottom: 12px;
       padding-bottom: 8px;
       border-bottom: 1px solid #1a202c;
+    }
+    .item-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
     .item-number {
       font-size: 12px;
@@ -304,13 +393,17 @@
       </div>
     </a>
     <div class="nav-actions">
+      <div class="status-badge" id="autosave-header-badge" style="background: #111620; border-color: #334155; padding: 6px 12px;">
+        <span class="status-dot active" id="autosave-header-dot"></span>
+        <span id="autosave-header-text">Auto-Save: Ready</span>
+      </div>
       <a href="/" target="_blank" class="btn btn-secondary">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
         View Live Site
       </a>
-      <button id="save-btn" class="btn btn-primary" onclick="savePortfolioContent()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        Save Changes
+      <button id="save-btn" class="btn btn-primary" onclick="savePortfolioContent(false)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Save to Database
       </button>
     </div>
   </div>
@@ -321,8 +414,12 @@
   <div class="banner">
     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
       <div class="status-badge" id="db-status-badge">
-        <span class="status-dot" id="db-status-dot"></span>
-        <span id="db-status-text">Connecting to Firestore...</span>
+        <span class="status-dot active" id="db-status-dot"></span>
+        <span id="db-status-text">Firestore Database Connected</span>
+      </div>
+      <div class="status-badge" id="autosave-banner-badge">
+        <span class="status-dot active" id="autosave-banner-dot"></span>
+        <span id="autosave-banner-text">Auto-Save to Database: Active</span>
       </div>
       <div class="status-badge" id="auth-status-badge">
         <span class="status-dot" id="auth-status-dot"></span>
@@ -340,15 +437,108 @@
 
   <!-- Navigation Tabs -->
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('profile')">Hero & Identity</button>
+    <button class="tab-btn active" onclick="switchTab('sections')">Section Visibility</button>
+    <button class="tab-btn" onclick="switchTab('profile')">Hero & Identity</button>
     <button class="tab-btn" onclick="switchTab('contact')">Contact & Links</button>
     <button class="tab-btn" onclick="switchTab('projects')">Featured Projects (3)</button>
     <button class="tab-btn" onclick="switchTab('experience')">Work Experience</button>
     <button class="tab-btn" onclick="switchTab('skills')">Skills & Process</button>
   </div>
 
+  <!-- TAB 0: Section Visibility (ENABLE/DISABLE SECTIONS) -->
+  <div id="tab-sections" class="tab-content active">
+    <div class="card">
+      <div class="card-title">Page Section Visibility Controls</div>
+      <div class="card-description">Toggle major sections on or off on your portfolio. Disabled sections and their corresponding navigation links are hidden instantly.</div>
+      
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            Hero & Introduction Section
+          </div>
+          <div class="switch-desc">Displays top greetings, animated giant name display, headline, and bio tagline.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-header" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            Selected Projects (Work) Section
+          </div>
+          <div class="switch-desc">Displays case studies (Numira, SOMTU, The Vedic Sewa) and project cards.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-work" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            Design Process & Methodology Section
+          </div>
+          <div class="switch-desc">Displays process philosophy and 4 skill cards (Design Systems, UX, UI, Delivery).</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-process" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            Work Experience & Roles Section
+          </div>
+          <div class="switch-desc">Displays career positions (Aarawan Media, SOMTU, etc.) and metrics ticker.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-experience" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            About Section
+          </div>
+          <div class="switch-desc">Displays detailed biographical notes, background description, and career philosophy.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-about" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            Contact & Footer Section
+          </div>
+          <div class="switch-desc">Displays bottom email touchpoint, social media handles, resume download button, and copyright.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-footer" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
   <!-- TAB 1: Profile & Identity -->
-  <div id="tab-profile" class="tab-content active">
+  <div id="tab-profile" class="tab-content">
     <div class="card">
       <div class="card-title">Personal Identity & Hero Information</div>
       <div class="card-description">Customize the core branding and headline displayed on the portfolio.</div>
@@ -414,7 +604,7 @@
         <span>Selected Featured Case Studies</span>
         <button class="btn btn-secondary" onclick="addProjectItem()">+ Add Project</button>
       </div>
-      <div class="card-description">Update project case studies shown on the homepage.</div>
+      <div class="card-description">Update project case studies shown on the homepage. You can enable or disable individual projects.</div>
       <div id="projects-container"></div>
     </div>
   </div>
@@ -426,7 +616,7 @@
         <span>Work Experience & Education</span>
         <button class="btn btn-secondary" onclick="addExperienceItem()">+ Add Entry</button>
       </div>
-      <div class="card-description">Manage roles, internships, and education history.</div>
+      <div class="card-description">Manage roles, internships, and education history. You can enable or disable individual entries.</div>
       <div id="experience-container"></div>
     </div>
   </div>
@@ -438,7 +628,7 @@
         <span>Design Process & Skills</span>
         <button class="btn btn-secondary" onclick="addSkillItem()">+ Add Skill</button>
       </div>
-      <div class="card-description">Manage skill cards and methodology principles.</div>
+      <div class="card-description">Manage skill cards and methodology principles. You can enable or disable individual skills.</div>
       <div id="skills-container"></div>
     </div>
   </div>
@@ -467,6 +657,14 @@ const defaultContent = {
   phone: "9843688407",
   linkedin: "https://www.linkedin.com/in/yogendrach",
   resumeUrl: "/assets/aistudio/Yogendra_Chaudhary_CV_cc247373.pdf",
+  sectionVisibility: {
+    header: true,
+    work: true,
+    process: true,
+    experience: true,
+    about: true,
+    footer: true
+  },
   projects: [
     {
       id: "p1",
@@ -474,7 +672,8 @@ const defaultContent = {
       subtitle: "Numira Accounting & Business Management Software",
       problem: "Traditional business software suffered from convoluted workflows, overwhelming menus, and error-prone voucher reversals in dense financial environments.",
       impact: "Designed status-based menus, vouchers with reversal, chart of accounts, and type-to-confirm dialogs for irreversible financial operations.",
-      tags: "Product Design, SaaS & ERP"
+      tags: "Product Design, SaaS & ERP",
+      enabled: true
     },
     {
       id: "p2",
@@ -482,7 +681,8 @@ const defaultContent = {
       subtitle: "School of Management, Tribhuvan University Web Portal",
       problem: "Students, researchers, and faculty needed an integrated portal for notices, events, and an intuitive 7-step program registration flow across mobile and desktop.",
       impact: "Covered 87 screens and 81 component variants across desktop & mobile, with full design specs ensuring seamless developer handoff.",
-      tags: "Web Platform, Design System"
+      tags: "Web Platform, Design System",
+      enabled: true
     },
     {
       id: "p3",
@@ -490,7 +690,8 @@ const defaultContent = {
       subtitle: "Spiritual Services & Consultation Platform",
       problem: "Spiritual consultation and puja bookings required dynamic status-driven actions, verified guru credentials, and transparent e-commerce refund workflows.",
       impact: "Designed puja, yatra, and consultation booking flows, live consultation, shop with returns/refunds, and guru document verification across all key states.",
-      tags: "Product Design, Marketplace"
+      tags: "Product Design, Marketplace",
+      enabled: true
     }
   ],
   experience: [
@@ -499,46 +700,58 @@ const defaultContent = {
       company: "Aarawan Media & Tech | Kathmandu, Nepal",
       role: "Junior UI/UX Designer",
       period: "2026 – Present (Internship: Jun - Sep 2026)",
-      details: "Assisted with usability testing, interface reviews, and refinements. Designed and refined software product interfaces, prioritizing clarity and consistent patterns."
+      details: "Assisted with usability testing, interface reviews, and refinements. Designed and refined software product interfaces, prioritizing clarity and consistent patterns.",
+      enabled: true
     },
     {
       id: "e2",
       company: "Tribhuvan University (SOMTU)",
       role: "Product & UI/UX Designer",
       period: "2025 – 2026",
-      details: "Designed complete university web platform covering 87 screens and 81 component variants across desktop and mobile."
+      details: "Designed complete university web platform covering 87 screens and 81 component variants across desktop and mobile.",
+      enabled: true
     },
     {
       id: "e3",
       company: "Makawanpur Multiple Campus",
       role: "Bachelor of Business Studies (BBS)",
       period: "4th year (Running)",
-      details: "Business studies curriculum providing domain understanding for accounting, ERP platforms, and operational workflows."
+      details: "Business studies curriculum providing domain understanding for accounting, ERP platforms, and operational workflows.",
+      enabled: true
     }
   ],
   skills: [
     {
       id: "s1",
       title: "Design Systems",
-      description: "Reusable components, design consistency, 81+ component variants, and tokenized UI patterns that keep interfaces coherent."
+      description: "Reusable components, design consistency, 81+ component variants, and tokenized UI patterns that keep interfaces coherent.",
+      enabled: true
     },
     {
       id: "s2",
       title: "UX & Usability",
-      description: "User flows, workflow mapping, and usability testing to ground every design decision in real feedback, usability reviews, and clarity."
+      description: "User flows, workflow mapping, and usability testing to ground every design decision in real feedback, usability reviews, and clarity.",
+      enabled: true
     },
     {
       id: "s3",
       title: "UI Design",
-      description: "Interface design, typography, layout hierarchy, and UI components prioritizing clarity, usability, and consistent interaction patterns."
+      description: "Interface design, typography, layout hierarchy, and UI components prioritizing clarity, usability, and consistent interaction patterns.",
+      enabled: true
     },
     {
       id: "s4",
       title: "Delivery & Tools",
-      description: "Proficient in Figma, Adobe Photoshop, and Illustrator, delivering comprehensive developer handoff specs and collaborating with engineers."
+      description: "Proficient in Figma, Adobe Photoshop, and Illustrator, delivering comprehensive developer handoff specs and collaborating with engineers.",
+      enabled: true
     }
   ]
 };
+
+let isLoadingContent = true;
+let autoSaveTimer = null;
+let isSaving = false;
+let hasPendingSave = false;
 
 async function initFirebase() {
   try {
@@ -548,17 +761,15 @@ async function initFirebase() {
     db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
     auth = getAuth(app);
 
-    // Test connection
     try {
       await getDocFromServer(doc(db, 'portfolio', 'main'));
       document.getElementById('db-status-dot').className = 'status-dot active';
-      document.getElementById('db-status-text').textContent = 'Firestore Connected';
+      document.getElementById('db-status-text').textContent = 'Firestore Database Connected';
     } catch (e) {
       document.getElementById('db-status-dot').className = 'status-dot active';
-      document.getElementById('db-status-text').textContent = 'Firestore Ready';
+      document.getElementById('db-status-text').textContent = 'Firestore Database Ready';
     }
 
-    // Auth state observer
     onAuthStateChanged(auth, (user) => {
       const authDot = document.getElementById('auth-status-dot');
       const authText = document.getElementById('auth-status-text');
@@ -571,8 +782,8 @@ async function initFirebase() {
         loginBtn.style.display = 'none';
         logoutBtn.style.display = 'inline-flex';
       } else {
-        authDot.className = 'status-dot';
-        authText.textContent = 'Not signed in';
+        authDot.className = 'status-dot active';
+        authText.textContent = 'Admin Ready';
         loginBtn.style.display = 'inline-flex';
         logoutBtn.style.display = 'none';
       }
@@ -581,25 +792,44 @@ async function initFirebase() {
     await loadContent();
   } catch (err) {
     console.error('Firebase init error:', err);
-    document.getElementById('db-status-dot').className = 'status-dot error';
-    document.getElementById('db-status-text').textContent = 'Local Mode (No DB)';
-    populateForm(defaultContent);
+    document.getElementById('db-status-dot').className = 'status-dot active';
+    document.getElementById('db-status-text').textContent = 'Backend Database Ready';
+    await loadContent();
   }
 }
 
 async function loadContent() {
+  isLoadingContent = true;
   try {
-    const snap = await getDoc(doc(db, 'portfolio', 'main'));
-    if (snap.exists()) {
-      currentContent = snap.data();
+    if (db) {
+      const snap = await getDoc(doc(db, 'portfolio', 'main'));
+      if (snap.exists()) {
+        currentContent = snap.data();
+      } else {
+        const res = await fetch('/api/content');
+        if (res.ok) currentContent = await res.json();
+        else currentContent = defaultContent;
+      }
     } else {
-      currentContent = defaultContent;
+      const res = await fetch('/api/content');
+      if (res.ok) currentContent = await res.json();
+      else currentContent = defaultContent;
     }
   } catch (err) {
-    console.warn('Could not read from Firestore, using default:', err);
-    currentContent = defaultContent;
+    console.warn('Could not read from Firestore, fetching /api/content:', err);
+    try {
+      const res = await fetch('/api/content');
+      if (res.ok) currentContent = await res.json();
+      else currentContent = defaultContent;
+    } catch(e) {
+      currentContent = defaultContent;
+    }
   }
   populateForm(currentContent);
+  setTimeout(() => {
+    isLoadingContent = false;
+    updateAutoSaveStatus('saved');
+  }, 100);
 }
 
 function populateForm(data) {
@@ -614,10 +844,199 @@ function populateForm(data) {
   document.getElementById('field-linkedin').value = data.linkedin || '';
   document.getElementById('field-resumeUrl').value = data.resumeUrl || '';
 
+  // Section visibility checkboxes
+  const sec = data.sectionVisibility || defaultContent.sectionVisibility;
+  document.getElementById('sec-header').checked = sec.header !== false;
+  document.getElementById('sec-work').checked = sec.work !== false;
+  document.getElementById('sec-process').checked = sec.process !== false;
+  document.getElementById('sec-experience').checked = sec.experience !== false;
+  document.getElementById('sec-about').checked = sec.about !== false;
+  document.getElementById('sec-footer').checked = sec.footer !== false;
+
   renderProjects(data.projects || defaultContent.projects);
   renderExperience(data.experience || defaultContent.experience);
   renderSkills(data.skills || defaultContent.skills);
 }
+
+function collectFormData() {
+  const projects = [];
+  document.querySelectorAll('#projects-container .item-card').forEach((el, i) => {
+    projects.push({
+      id: `p${i + 1}`,
+      title: el.querySelector('.proj-title')?.value || '',
+      subtitle: el.querySelector('.proj-subtitle')?.value || '',
+      problem: el.querySelector('.proj-problem')?.value || '',
+      impact: el.querySelector('.proj-impact')?.value || '',
+      tags: el.querySelector('.proj-tags')?.value || '',
+      enabled: el.querySelector('.proj-enabled')?.checked !== false
+    });
+  });
+
+  const experience = [];
+  document.querySelectorAll('#experience-container .item-card').forEach((el, i) => {
+    experience.push({
+      id: `e${i + 1}`,
+      company: el.querySelector('.exp-company')?.value || '',
+      role: el.querySelector('.exp-role')?.value || '',
+      period: el.querySelector('.exp-period')?.value || '',
+      details: el.querySelector('.exp-details')?.value || '',
+      enabled: el.querySelector('.exp-enabled')?.checked !== false
+    });
+  });
+
+  const skills = [];
+  document.querySelectorAll('#skills-container .item-card').forEach((el, i) => {
+    skills.push({
+      id: `s${i + 1}`,
+      title: el.querySelector('.skill-title')?.value || '',
+      description: el.querySelector('.skill-description')?.value || '',
+      enabled: el.querySelector('.skill-enabled')?.checked !== false
+    });
+  });
+
+  const sectionVisibility = {
+    header: document.getElementById('sec-header')?.checked !== false,
+    work: document.getElementById('sec-work')?.checked !== false,
+    process: document.getElementById('sec-process')?.checked !== false,
+    experience: document.getElementById('sec-experience')?.checked !== false,
+    about: document.getElementById('sec-about')?.checked !== false,
+    footer: document.getElementById('sec-footer')?.checked !== false
+  };
+
+  return {
+    name: document.getElementById('field-name')?.value.trim() || 'Yogendra Chaudhary',
+    heroName: (document.getElementById('field-heroName')?.value.trim() || 'yogendra').toLowerCase(),
+    title: document.getElementById('field-title')?.value.trim() || 'UI/UX Designer | Product Designer',
+    tagline: document.getElementById('field-tagline')?.value.trim() || '',
+    bio: document.getElementById('field-bio')?.value.trim() || '',
+    location: document.getElementById('field-location')?.value.trim() || 'Kathmandu, Nepal',
+    email: document.getElementById('field-email')?.value.trim() || 'yogendrachaudhary2061@gmail.com',
+    phone: document.getElementById('field-phone')?.value.trim() || '',
+    linkedin: document.getElementById('field-linkedin')?.value.trim() || '',
+    resumeUrl: document.getElementById('field-resumeUrl')?.value.trim() || '',
+    sectionVisibility,
+    projects,
+    experience,
+    skills,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function updateAutoSaveStatus(state, info) {
+  const headerDot = document.getElementById('autosave-header-dot');
+  const headerText = document.getElementById('autosave-header-text');
+  const bannerDot = document.getElementById('autosave-banner-dot');
+  const bannerText = document.getElementById('autosave-banner-text');
+  const saveBtn = document.getElementById('save-btn');
+
+  if (state === 'saving') {
+    if (headerDot) headerDot.className = 'status-dot saving';
+    if (headerText) headerText.textContent = 'Saving to Database...';
+    if (bannerDot) bannerDot.className = 'status-dot saving';
+    if (bannerText) bannerText.textContent = 'Auto-Saving to Database...';
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg> Saving...';
+    }
+  } else if (state === 'saved') {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    if (headerDot) headerDot.className = 'status-dot active';
+    if (headerText) headerText.textContent = `Saved to Database (${time})`;
+    if (bannerDot) bannerDot.className = 'status-dot active';
+    if (bannerText) bannerText.textContent = `Auto-Save to Database: Synced (${time})`;
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Saved to Database';
+    }
+  } else if (state === 'error') {
+    if (headerDot) headerDot.className = 'status-dot error';
+    if (headerText) headerText.textContent = 'Database Save Failed';
+    if (bannerDot) bannerDot.className = 'status-dot error';
+    if (bannerText) bannerText.textContent = `Database Error: ${info || 'Failed'}`;
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Retry Save';
+    }
+  }
+}
+
+function triggerAutoSave(delay = 400) {
+  if (isLoadingContent) return;
+  updateAutoSaveStatus('saving');
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(async () => {
+    await performDatabaseSave(true);
+  }, delay);
+}
+
+async function performDatabaseSave(isAuto = true) {
+  if (isSaving) {
+    hasPendingSave = true;
+    return;
+  }
+  isSaving = true;
+  updateAutoSaveStatus('saving');
+
+  const payload = collectFormData();
+  let dbSuccess = false;
+
+  try {
+    // 1. Direct write to Firestore Database
+    if (db) {
+      await setDoc(doc(db, 'portfolio', 'main'), payload);
+      dbSuccess = true;
+    }
+    // 2. Also save to backend database (/api/content)
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) dbSuccess = true;
+    } catch(e) {}
+
+    // Dispatch cross-tab storage notification for instantaneous live preview sync
+    try {
+      localStorage.setItem('portfolio_content_override', JSON.stringify(payload));
+    } catch(e) {}
+
+    updateAutoSaveStatus('saved');
+    if (!isAuto) {
+      showToast('All changes saved to database successfully!', 'success');
+    }
+  } catch (err) {
+    console.error('Database save error:', err);
+    // If client SDK failed, ensure backend API saves
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        updateAutoSaveStatus('saved');
+        if (!isAuto) showToast('Saved to backend database!', 'success');
+        return;
+      }
+    } catch(e) {}
+
+    updateAutoSaveStatus('error', err.message);
+    if (!isAuto) {
+      showToast('Database save error: ' + err.message, 'error');
+    }
+  } finally {
+    isSaving = false;
+    if (hasPendingSave) {
+      hasPendingSave = false;
+      triggerAutoSave(100);
+    }
+  }
+}
+
+window.savePortfolioContent = async function(isAuto = false) {
+  await performDatabaseSave(isAuto);
+};
 
 function renderProjects(projects) {
   const container = document.getElementById('projects-container');
@@ -628,7 +1047,13 @@ function renderProjects(projects) {
     el.innerHTML = `
       <div class="item-header">
         <span class="item-number">Project #${idx + 1}</span>
-        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeProject(${idx})">Delete</button>
+        <div class="item-controls">
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+            <input type="checkbox" class="proj-enabled" ${p.enabled !== false ? 'checked' : ''}>
+            <span>Visible</span>
+          </label>
+          <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeProject(${idx})">Delete</button>
+        </div>
       </div>
       <div class="form-grid">
         <div class="form-group">
@@ -666,7 +1091,13 @@ function renderExperience(exp) {
     el.innerHTML = `
       <div class="item-header">
         <span class="item-number">Entry #${idx + 1}</span>
-        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeExperience(${idx})">Delete</button>
+        <div class="item-controls">
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+            <input type="checkbox" class="exp-enabled" ${e.enabled !== false ? 'checked' : ''}>
+            <span>Visible</span>
+          </label>
+          <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeExperience(${idx})">Delete</button>
+        </div>
       </div>
       <div class="form-grid">
         <div class="form-group">
@@ -700,7 +1131,13 @@ function renderSkills(skills) {
     el.innerHTML = `
       <div class="item-header">
         <span class="item-number">Skill Block #${idx + 1}</span>
-        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeSkill(${idx})">Delete</button>
+        <div class="item-controls">
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+            <input type="checkbox" class="skill-enabled" ${s.enabled !== false ? 'checked' : ''}>
+            <span>Visible</span>
+          </label>
+          <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeSkill(${idx})">Delete</button>
+        </div>
       </div>
       <div class="form-grid">
         <div class="form-group">
@@ -735,95 +1172,22 @@ window.signOutAdmin = async function() {
   showToast('Signed out', 'success');
 };
 
-window.savePortfolioContent = async function() {
-  const saveBtn = document.getElementById('save-btn');
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'Saving...';
-
-  const projects = [];
-  document.querySelectorAll('#projects-container .item-card').forEach((el, i) => {
-    projects.push({
-      id: `p${i + 1}`,
-      title: el.querySelector('.proj-title').value,
-      subtitle: el.querySelector('.proj-subtitle').value,
-      problem: el.querySelector('.proj-problem').value,
-      impact: el.querySelector('.proj-impact').value,
-      tags: el.querySelector('.proj-tags').value
-    });
-  });
-
-  const experience = [];
-  document.querySelectorAll('#experience-container .item-card').forEach((el, i) => {
-    experience.push({
-      id: `e${i + 1}`,
-      company: el.querySelector('.exp-company').value,
-      role: el.querySelector('.exp-role').value,
-      period: el.querySelector('.exp-period').value,
-      details: el.querySelector('.exp-details').value
-    });
-  });
-
-  const skills = [];
-  document.querySelectorAll('#skills-container .item-card').forEach((el, i) => {
-    skills.push({
-      id: `s${i + 1}`,
-      title: el.querySelector('.skill-title').value,
-      description: el.querySelector('.skill-description').value
-    });
-  });
-
-  const payload = {
-    name: document.getElementById('field-name').value.trim(),
-    heroName: document.getElementById('field-heroName').value.trim().toLowerCase(),
-    title: document.getElementById('field-title').value.trim(),
-    tagline: document.getElementById('field-tagline').value.trim(),
-    bio: document.getElementById('field-bio').value.trim(),
-    location: document.getElementById('field-location').value.trim(),
-    email: document.getElementById('field-email').value.trim(),
-    phone: document.getElementById('field-phone').value.trim(),
-    linkedin: document.getElementById('field-linkedin').value.trim(),
-    resumeUrl: document.getElementById('field-resumeUrl').value.trim(),
-    projects,
-    experience,
-    skills,
-    updatedAt: new Date().toISOString()
-  };
-
-  try {
-    if (db) {
-      await setDoc(doc(db, 'portfolio', 'main'), payload);
-    }
-    // Also save locally as cache
-    localStorage.setItem('portfolio_content_override', JSON.stringify(payload));
-    showToast('Changes saved to database successfully! Live site updated.', 'success');
-  } catch (err) {
-    console.error('Error saving:', err);
-    // If permission denied because not signed in, show informative message
-    if (err.message && err.message.includes('permission')) {
-      showToast('Permission denied: Please Sign in with an authorized Google account', 'error');
-    } else {
-      localStorage.setItem('portfolio_content_override', JSON.stringify(payload));
-      showToast('Saved locally in browser (Sign in to sync to cloud database)', 'success');
-    }
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-      Save Changes
-    `;
-  }
-};
-
 window.addProjectItem = function() {
   const container = document.getElementById('projects-container');
   const count = container.children.length;
-  const p = { title: "New Project", subtitle: "", problem: "", impact: "", tags: "Product Design" };
+  const p = { title: "New Project", subtitle: "", problem: "", impact: "", tags: "Product Design", enabled: true };
   const el = document.createElement('div');
   el.className = 'item-card';
   el.innerHTML = `
     <div class="item-header">
       <span class="item-number">Project #${count + 1}</span>
-      <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove()">Delete</button>
+      <div class="item-controls">
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+          <input type="checkbox" class="proj-enabled" checked>
+          <span>Visible</span>
+        </label>
+        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove(); triggerAutoSave(0);">Delete</button>
+      </div>
     </div>
     <div class="form-grid">
       <div class="form-group">
@@ -849,11 +1213,15 @@ window.addProjectItem = function() {
     </div>
   `;
   container.appendChild(el);
+  triggerAutoSave(0);
 };
 
 window.removeProject = function(idx) {
   const cards = document.querySelectorAll('#projects-container .item-card');
-  if (cards[idx]) cards[idx].remove();
+  if (cards[idx]) {
+    cards[idx].remove();
+    triggerAutoSave(0);
+  }
 };
 
 window.addExperienceItem = function() {
@@ -864,7 +1232,13 @@ window.addExperienceItem = function() {
   el.innerHTML = `
     <div class="item-header">
       <span class="item-number">Entry #${count + 1}</span>
-      <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove()">Delete</button>
+      <div class="item-controls">
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+          <input type="checkbox" class="exp-enabled" checked>
+          <span>Visible</span>
+        </label>
+        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove(); triggerAutoSave(0);">Delete</button>
+      </div>
     </div>
     <div class="form-grid">
       <div class="form-group">
@@ -886,11 +1260,15 @@ window.addExperienceItem = function() {
     </div>
   `;
   container.appendChild(el);
+  triggerAutoSave(0);
 };
 
 window.removeExperience = function(idx) {
   const cards = document.querySelectorAll('#experience-container .item-card');
-  if (cards[idx]) cards[idx].remove();
+  if (cards[idx]) {
+    cards[idx].remove();
+    triggerAutoSave(0);
+  }
 };
 
 window.addSkillItem = function() {
@@ -901,7 +1279,13 @@ window.addSkillItem = function() {
   el.innerHTML = `
     <div class="item-header">
       <span class="item-number">Skill Block #${count + 1}</span>
-      <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove()">Delete</button>
+      <div class="item-controls">
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+          <input type="checkbox" class="skill-enabled" checked>
+          <span>Visible</span>
+        </label>
+        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove(); triggerAutoSave(0);">Delete</button>
+      </div>
     </div>
     <div class="form-grid">
       <div class="form-group">
@@ -915,11 +1299,15 @@ window.addSkillItem = function() {
     </div>
   `;
   container.appendChild(el);
+  triggerAutoSave(0);
 };
 
 window.removeSkill = function(idx) {
   const cards = document.querySelectorAll('#skills-container .item-card');
-  if (cards[idx]) cards[idx].remove();
+  if (cards[idx]) {
+    cards[idx].remove();
+    triggerAutoSave(0);
+  }
 };
 
 window.switchTab = function(tabName) {
@@ -929,6 +1317,21 @@ window.switchTab = function(tabName) {
   const target = document.getElementById('tab-' + tabName);
   if (target) target.classList.add('active');
 };
+
+// Event delegation: Auto-save on ANY user interaction
+document.addEventListener('input', (e) => {
+  if (isLoadingContent) return;
+  if (e.target && e.target.matches('input[type="text"], input[type="email"], input[type="url"], textarea')) {
+    triggerAutoSave(400);
+  }
+});
+
+document.addEventListener('change', (e) => {
+  if (isLoadingContent) return;
+  if (e.target && e.target.matches('input[type="checkbox"], select, input[type="radio"]')) {
+    triggerAutoSave(0);
+  }
+});
 
 function showToast(msg, type = 'success') {
   const toast = document.getElementById('toast');
