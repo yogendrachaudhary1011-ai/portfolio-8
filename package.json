@@ -12,7 +12,8 @@
     "start": "node server.mjs --port 3000 --host 0.0.0.0",
     "build": "node scripts/build.mjs",
     "verify": "node scripts/verify.mjs",
-    "test": "node scripts/test.mjs"
+    "test": "node scripts/test.mjs",
+    "lint": "node scripts/verify.mjs"
   },
   "dependencies": {
     "firebase": "^13.1.0"
