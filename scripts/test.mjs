@@ -44,4 +44,4 @@ try {
   const bad = await get('/%2e%2e%2Fpackage.json');
   if (bad.response.status!==400) throw new Error('Traversal protection failed');
   console.log(`PASS — ${cases.length} original page routes, image asset bytes, 404 eliminated with home redirect, and path validation.`);
-} finally {child.kill('SIGTERM');}
+} finally {child.kill('SIGTERM'); process.exit(0);}

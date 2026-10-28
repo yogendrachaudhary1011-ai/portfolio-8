@@ -21,4 +21,20 @@ try {
 try {
   await cp(resolve(root, 'data'), resolve(dist, 'data'), {recursive: true});
 } catch {}
-console.log('Built dist/ with byte-for-byte copies of all published Framer pages and assets.');
+// Also sync to public/ in case Vercel project settings default output to public
+const pub = resolve(root, 'public');
+try {
+  await mkdir(pub, {recursive: true});
+  for (const page of ['index.html', 'perro.html', 'perro-deepdive.html', 'mercore.html', '.nojekyll', 'admin.html', 'firebase-applet-config.json']) {
+    try {
+      await copyFile(resolve(root, page), resolve(pub, page));
+    } catch {}
+  }
+  await writeFile(resolve(pub, '404.html'), redirect404, 'utf8');
+  await cp(resolve(root, 'framerusercontent.com'), resolve(pub, 'framerusercontent.com'), {recursive: true});
+  await cp(resolve(root, 'assets'), resolve(pub, 'assets'), {recursive: true});
+  await cp(resolve(root, 'data'), resolve(pub, 'data'), {recursive: true});
+} catch (e) {
+  console.warn('Sync to public note:', e.message);
+}
+console.log('Built dist/ and public/ with byte-for-byte copies of all published Framer pages and assets.');

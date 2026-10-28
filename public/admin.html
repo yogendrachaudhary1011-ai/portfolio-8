@@ -1,0 +1,1351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio Admin Panel — Yogendra Chaudhary</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f12;
+      --card-bg: #14181f;
+      --card-border: #232936;
+      --text: #f0f2f5;
+      --text-muted: #8c96a8;
+      --accent: #ff4d00;
+      --accent-hover: #e04400;
+      --accent-soft: rgba(255, 77, 0, 0.12);
+      --success: #10b981;
+      --success-soft: rgba(16, 185, 129, 0.12);
+      --danger: #ef4444;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(20, 24, 31, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 16px 24px;
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+    .btn-secondary {
+      background: #1b212c;
+      border-color: var(--card-border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: #232a38;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    .banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #1b212c;
+      border: 1px solid var(--card-border);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #64748b;
+    }
+    .status-dot.active { background: var(--success); }
+    .status-dot.saving {
+      background: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+      animation: pulseDot 0.8s ease-in-out infinite;
+    }
+    .status-dot.error { background: var(--danger); }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.35; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.25); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      border-radius: 8px 8px 0 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.15s ease;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--text);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-bottom-color: var(--card-bg);
+      margin-bottom: -1px;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-description {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    input[type="text"], input[type="email"], input[type="url"], textarea, select {
+      background: #0f1319;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.15s ease;
+      width: 100%;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    
+    /* Toggle switch styles */
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-radius: 10px;
+      background: #0f1319;
+      border: 1px solid var(--card-border);
+      margin-bottom: 12px;
+      transition: border-color 0.15s ease;
+    }
+    .switch-row:hover {
+      border-color: #334155;
+    }
+    .switch-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .switch-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .switch-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #2a3447;
+      transition: .25s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .item-card {
+      background: #0f1319;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1a202c;
+    }
+    .item-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .item-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      background: #1e293b;
+      border: 1px solid #334155;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 100;
+      animation: fadeIn 0.2s ease;
+    }
+    .toast.success { background: #065f46; border-color: #059669; }
+    .toast.error { background: #991b1b; border-color: #dc2626; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-content">
+    <a href="/" class="brand">
+      <div class="brand-logo">YC</div>
+      <div>
+        <div class="brand-title">Portfolio Admin Panel</div>
+        <div class="brand-subtitle">Firebase Database & Live Content Management</div>
+      </div>
+    </a>
+    <div class="nav-actions">
+      <div class="status-badge" id="autosave-header-badge" style="background: #111620; border-color: #334155; padding: 6px 12px;">
+        <span class="status-dot active" id="autosave-header-dot"></span>
+        <span id="autosave-header-text">Auto-Save: Ready</span>
+      </div>
+      <a href="/" target="_blank" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        View Live Site
+      </a>
+      <button id="save-btn" class="btn btn-primary" onclick="savePortfolioContent(false)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Save to Database
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Connection & Auth Status Banner -->
+  <div class="banner">
+    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+      <div class="status-badge" id="db-status-badge">
+        <span class="status-dot active" id="db-status-dot"></span>
+        <span id="db-status-text">Firestore Database Connected</span>
+      </div>
+      <div class="status-badge" id="autosave-banner-badge">
+        <span class="status-dot active" id="autosave-banner-dot"></span>
+        <span id="autosave-banner-text">Auto-Save to Database: Active</span>
+      </div>
+      <div class="status-badge" id="auth-status-badge">
+        <span class="status-dot" id="auth-status-dot"></span>
+        <span id="auth-status-text">Checking Auth...</span>
+      </div>
+    </div>
+    <div id="auth-actions" style="display: flex; gap: 8px;">
+      <button id="login-btn" class="btn btn-secondary" onclick="signInAdmin()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z"/></svg>
+        Sign in with Google
+      </button>
+      <button id="logout-btn" class="btn btn-danger" style="display:none;" onclick="signOutAdmin()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('sections')">Section Visibility</button>
+    <button class="tab-btn" onclick="switchTab('profile')">Hero & Identity</button>
+    <button class="tab-btn" onclick="switchTab('contact')">Contact & Links</button>
+    <button class="tab-btn" onclick="switchTab('projects')">Featured Projects (3)</button>
+    <button class="tab-btn" onclick="switchTab('experience')">Work Experience</button>
+    <button class="tab-btn" onclick="switchTab('skills')">Skills & Process</button>
+  </div>
+
+  <!-- TAB 0: Section Visibility (ENABLE/DISABLE SECTIONS) -->
+  <div id="tab-sections" class="tab-content active">
+    <div class="card">
+      <div class="card-title">Page Section Visibility Controls</div>
+      <div class="card-description">Toggle major sections on or off on your portfolio. Disabled sections and their corresponding navigation links are hidden instantly.</div>
+      
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            Hero & Introduction Section
+          </div>
+          <div class="switch-desc">Displays top greetings, animated giant name display, headline, and bio tagline.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-header" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            Selected Projects (Work) Section
+          </div>
+          <div class="switch-desc">Displays case studies (Numira, SOMTU, The Vedic Sewa) and project cards.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-work" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            Design Process & Methodology Section
+          </div>
+          <div class="switch-desc">Displays process philosophy and 4 skill cards (Design Systems, UX, UI, Delivery).</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-process" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            Work Experience & Roles Section
+          </div>
+          <div class="switch-desc">Displays career positions (Aarawan Media, SOMTU, etc.) and metrics ticker.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-experience" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            About Section
+          </div>
+          <div class="switch-desc">Displays detailed biographical notes, background description, and career philosophy.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-about" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <div class="switch-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            Contact & Footer Section
+          </div>
+          <div class="switch-desc">Displays bottom email touchpoint, social media handles, resume download button, and copyright.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="sec-footer" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 1: Profile & Identity -->
+  <div id="tab-profile" class="tab-content">
+    <div class="card">
+      <div class="card-title">Personal Identity & Hero Information</div>
+      <div class="card-description">Customize the core branding and headline displayed on the portfolio.</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Display Name</label>
+          <input type="text" id="field-name" placeholder="Yogendra Chaudhary" value="Yogendra Chaudhary">
+        </div>
+        <div class="form-group">
+          <label>Giant Hero Name (Ticker Display)</label>
+          <input type="text" id="field-heroName" placeholder="yogendra" value="yogendra">
+        </div>
+        <div class="form-group">
+          <label>Professional Role / Title</label>
+          <input type="text" id="field-title" placeholder="UI/UX Designer | Product Designer" value="UI/UX Designer | Product Designer">
+        </div>
+        <div class="form-group">
+          <label>Primary Location</label>
+          <input type="text" id="field-location" placeholder="Kathmandu, Nepal" value="Kathmandu, Nepal">
+        </div>
+        <div class="form-group full">
+          <label>Hero Tagline</label>
+          <textarea id="field-tagline" placeholder="UI/UX Designer & Product Designer, crafting intuitive software interfaces and user-centered workflows.">UI/UX Designer & Product Designer, crafting intuitive software interfaces and user-centered workflows.</textarea>
+        </div>
+        <div class="form-group full">
+          <label>Bio / Profile Introduction</label>
+          <textarea id="field-bio" placeholder="Proficient in Figma, usability testing, and collaborating with developers to translate designs into functional products. Based in Kathmandu, Nepal.">Proficient in Figma, usability testing, and collaborating with developers to translate designs into functional products. Based in Kathmandu, Nepal.</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Contact & Links -->
+  <div id="tab-contact" class="tab-content">
+    <div class="card">
+      <div class="card-title">Contact Information & Social Links</div>
+      <div class="card-description">Control email routing, LinkedIn, phone number, and resume document links.</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="field-email" placeholder="yogendrachaudhary2061@gmail.com" value="yogendrachaudhary2061@gmail.com">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" id="field-phone" placeholder="9843688407" value="9843688407">
+        </div>
+        <div class="form-group">
+          <label>LinkedIn Profile URL</label>
+          <input type="url" id="field-linkedin" placeholder="https://www.linkedin.com/in/yogendrach" value="https://www.linkedin.com/in/yogendrach">
+        </div>
+        <div class="form-group">
+          <label>Resume / CV Document URL</label>
+          <input type="text" id="field-resumeUrl" placeholder="/assets/aistudio/Yogendra_Chaudhary_CV_cc247373.pdf" value="/assets/aistudio/Yogendra_Chaudhary_CV_cc247373.pdf">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Projects -->
+  <div id="tab-projects" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Selected Featured Case Studies</span>
+        <button class="btn btn-secondary" onclick="addProjectItem()">+ Add Project</button>
+      </div>
+      <div class="card-description">Update project case studies shown on the homepage. You can enable or disable individual projects.</div>
+      <div id="projects-container"></div>
+    </div>
+  </div>
+
+  <!-- TAB 4: Experience -->
+  <div id="tab-experience" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Work Experience & Education</span>
+        <button class="btn btn-secondary" onclick="addExperienceItem()">+ Add Entry</button>
+      </div>
+      <div class="card-description">Manage roles, internships, and education history. You can enable or disable individual entries.</div>
+      <div id="experience-container"></div>
+    </div>
+  </div>
+
+  <!-- TAB 5: Skills -->
+  <div id="tab-skills" class="tab-content">
+    <div class="card">
+      <div class="card-title">
+        <span>Design Process & Skills</span>
+        <button class="btn btn-secondary" onclick="addSkillItem()">+ Add Skill</button>
+      </div>
+      <div class="card-description">Manage skill cards and methodology principles. You can enable or disable individual skills.</div>
+      <div id="skills-container"></div>
+    </div>
+  </div>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<!-- Firebase Modular SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, getDocFromServer } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+let db, auth;
+let currentContent = null;
+
+// Initial default state derived from CV
+const defaultContent = {
+  name: "Yogendra Chaudhary",
+  heroName: "yogendra",
+  title: "UI/UX Designer | Product Designer",
+  tagline: "UI/UX & Product Designer, crafting intuitive software interfaces and user-centered workflows.",
+  bio: "Proficient in Figma, usability testing, and collaborating with developers to translate designs into functional products. Based in Kathmandu, Nepal.",
+  location: "Kathmandu, Nepal",
+  email: "yogendrachaudhary2061@gmail.com",
+  phone: "9843688407",
+  linkedin: "https://www.linkedin.com/in/yogendrach",
+  resumeUrl: "/assets/aistudio/Yogendra_Chaudhary_CV_cc247373.pdf",
+  sectionVisibility: {
+    header: true,
+    work: true,
+    process: true,
+    experience: true,
+    about: true,
+    footer: true
+  },
+  projects: [
+    {
+      id: "p1",
+      title: "Numira",
+      subtitle: "Numira Accounting & Business Management Software",
+      problem: "Traditional business software suffered from convoluted workflows, overwhelming menus, and error-prone voucher reversals in dense financial environments.",
+      impact: "Designed status-based menus, vouchers with reversal, chart of accounts, and type-to-confirm dialogs for irreversible financial operations.",
+      tags: "Product Design, SaaS & ERP",
+      enabled: true
+    },
+    {
+      id: "p2",
+      title: "SOMTU Website",
+      subtitle: "School of Management, Tribhuvan University Web Portal",
+      problem: "Students, researchers, and faculty needed an integrated portal for notices, events, and an intuitive 7-step program registration flow across mobile and desktop.",
+      impact: "Covered 87 screens and 81 component variants across desktop & mobile, with full design specs ensuring seamless developer handoff.",
+      tags: "Web Platform, Design System",
+      enabled: true
+    },
+    {
+      id: "p3",
+      title: "The Vedic Sewa",
+      subtitle: "Spiritual Services & Consultation Platform",
+      problem: "Spiritual consultation and puja bookings required dynamic status-driven actions, verified guru credentials, and transparent e-commerce refund workflows.",
+      impact: "Designed puja, yatra, and consultation booking flows, live consultation, shop with returns/refunds, and guru document verification across all key states.",
+      tags: "Product Design, Marketplace",
+      enabled: true
+    }
+  ],
+  experience: [
+    {
+      id: "e1",
+      company: "Aarawan Media & Tech | Kathmandu, Nepal",
+      role: "Junior UI/UX Designer",
+      period: "2026 – Present (Internship: Jun - Sep 2026)",
+      details: "Assisted with usability testing, interface reviews, and refinements. Designed and refined software product interfaces, prioritizing clarity and consistent patterns.",
+      enabled: true
+    },
+    {
+      id: "e2",
+      company: "Tribhuvan University (SOMTU)",
+      role: "Product & UI/UX Designer",
+      period: "2025 – 2026",
+      details: "Designed complete university web platform covering 87 screens and 81 component variants across desktop and mobile.",
+      enabled: true
+    },
+    {
+      id: "e3",
+      company: "Makawanpur Multiple Campus",
+      role: "Bachelor of Business Studies (BBS)",
+      period: "4th year (Running)",
+      details: "Business studies curriculum providing domain understanding for accounting, ERP platforms, and operational workflows.",
+      enabled: true
+    }
+  ],
+  skills: [
+    {
+      id: "s1",
+      title: "Design Systems",
+      description: "Reusable components, design consistency, 81+ component variants, and tokenized UI patterns that keep interfaces coherent.",
+      enabled: true
+    },
+    {
+      id: "s2",
+      title: "UX & Usability",
+      description: "User flows, workflow mapping, and usability testing to ground every design decision in real feedback, usability reviews, and clarity.",
+      enabled: true
+    },
+    {
+      id: "s3",
+      title: "UI Design",
+      description: "Interface design, typography, layout hierarchy, and UI components prioritizing clarity, usability, and consistent interaction patterns.",
+      enabled: true
+    },
+    {
+      id: "s4",
+      title: "Delivery & Tools",
+      description: "Proficient in Figma, Adobe Photoshop, and Illustrator, delivering comprehensive developer handoff specs and collaborating with engineers.",
+      enabled: true
+    }
+  ]
+};
+
+let isLoadingContent = true;
+let autoSaveTimer = null;
+let isSaving = false;
+let hasPendingSave = false;
+
+async function initFirebase() {
+  try {
+    const configResp = await fetch('/firebase-applet-config.json');
+    const firebaseConfig = await configResp.json();
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+    auth = getAuth(app);
+
+    try {
+      await getDocFromServer(doc(db, 'portfolio', 'main'));
+      document.getElementById('db-status-dot').className = 'status-dot active';
+      document.getElementById('db-status-text').textContent = 'Firestore Database Connected';
+    } catch (e) {
+      document.getElementById('db-status-dot').className = 'status-dot active';
+      document.getElementById('db-status-text').textContent = 'Firestore Database Ready';
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      const authDot = document.getElementById('auth-status-dot');
+      const authText = document.getElementById('auth-status-text');
+      const loginBtn = document.getElementById('login-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      if (user) {
+        authDot.className = 'status-dot active';
+        authText.textContent = `Admin: ${user.email}`;
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-flex';
+      } else {
+        authDot.className = 'status-dot active';
+        authText.textContent = 'Admin Ready';
+        loginBtn.style.display = 'inline-flex';
+        logoutBtn.style.display = 'none';
+      }
+    });
+
+    await loadContent();
+  } catch (err) {
+    console.error('Firebase init error:', err);
+    document.getElementById('db-status-dot').className = 'status-dot active';
+    document.getElementById('db-status-text').textContent = 'Backend Database Ready';
+    await loadContent();
+  }
+}
+
+async function loadContent() {
+  isLoadingContent = true;
+  try {
+    if (db) {
+      const snap = await getDoc(doc(db, 'portfolio', 'main'));
+      if (snap.exists()) {
+        currentContent = snap.data();
+      } else {
+        const res = await fetch('/api/content');
+        if (res.ok) currentContent = await res.json();
+        else currentContent = defaultContent;
+      }
+    } else {
+      const res = await fetch('/api/content');
+      if (res.ok) currentContent = await res.json();
+      else currentContent = defaultContent;
+    }
+  } catch (err) {
+    console.warn('Could not read from Firestore, fetching /api/content:', err);
+    try {
+      const res = await fetch('/api/content');
+      if (res.ok) currentContent = await res.json();
+      else currentContent = defaultContent;
+    } catch(e) {
+      currentContent = defaultContent;
+    }
+  }
+  populateForm(currentContent);
+  setTimeout(() => {
+    isLoadingContent = false;
+    updateAutoSaveStatus('saved');
+  }, 100);
+}
+
+function populateForm(data) {
+  document.getElementById('field-name').value = data.name || '';
+  document.getElementById('field-heroName').value = data.heroName || 'yogendra';
+  document.getElementById('field-title').value = data.title || '';
+  document.getElementById('field-tagline').value = data.tagline || '';
+  document.getElementById('field-bio').value = data.bio || '';
+  document.getElementById('field-location').value = data.location || '';
+  document.getElementById('field-email').value = data.email || '';
+  document.getElementById('field-phone').value = data.phone || '';
+  document.getElementById('field-linkedin').value = data.linkedin || '';
+  document.getElementById('field-resumeUrl').value = data.resumeUrl || '';
+
+  // Section visibility checkboxes
+  const sec = data.sectionVisibility || defaultContent.sectionVisibility;
+  document.getElementById('sec-header').checked = sec.header !== false;
+  document.getElementById('sec-work').checked = sec.work !== false;
+  document.getElementById('sec-process').checked = sec.process !== false;
+  document.getElementById('sec-experience').checked = sec.experience !== false;
+  document.getElementById('sec-about').checked = sec.about !== false;
+  document.getElementById('sec-footer').checked = sec.footer !== false;
+
+  renderProjects(data.projects || defaultContent.projects);
+  renderExperience(data.experience || defaultContent.experience);
+  renderSkills(data.skills || defaultContent.skills);
+}
+
+function collectFormData() {
+  const projects = [];
+  document.querySelectorAll('#projects-container .item-card').forEach((el, i) => {
+    projects.push({
+      id: `p${i + 1}`,
+      title: el.querySelector('.proj-title')?.value || '',
+      subtitle: el.querySelector('.proj-subtitle')?.value || '',
+      problem: el.querySelector('.proj-problem')?.value || '',
+      impact: el.querySelector('.proj-impact')?.value || '',
+      tags: el.querySelector('.proj-tags')?.value || '',
+      enabled: el.querySelector('.proj-enabled')?.checked !== false
+    });
+  });
+
+  const experience = [];
+  document.querySelectorAll('#experience-container .item-card').forEach((el, i) => {
+    experience.push({
+      id: `e${i + 1}`,
+      company: el.querySelector('.exp-company')?.value || '',
+      role: el.querySelector('.exp-role')?.value || '',
+      period: el.querySelector('.exp-period')?.value || '',
+      details: el.querySelector('.exp-details')?.value || '',
+      enabled: el.querySelector('.exp-enabled')?.checked !== false
+    });
+  });
+
+  const skills = [];
+  document.querySelectorAll('#skills-container .item-card').forEach((el, i) => {
+    skills.push({
+      id: `s${i + 1}`,
+      title: el.querySelector('.skill-title')?.value || '',
+      description: el.querySelector('.skill-description')?.value || '',
+      enabled: el.querySelector('.skill-enabled')?.checked !== false
+    });
+  });
+
+  const sectionVisibility = {
+    header: document.getElementById('sec-header')?.checked !== false,
+    work: document.getElementById('sec-work')?.checked !== false,
+    process: document.getElementById('sec-process')?.checked !== false,
+    experience: document.getElementById('sec-experience')?.checked !== false,
+    about: document.getElementById('sec-about')?.checked !== false,
+    footer: document.getElementById('sec-footer')?.checked !== false
+  };
+
+  return {
+    name: document.getElementById('field-name')?.value.trim() || 'Yogendra Chaudhary',
+    heroName: (document.getElementById('field-heroName')?.value.trim() || 'yogendra').toLowerCase(),
+    title: document.getElementById('field-title')?.value.trim() || 'UI/UX Designer | Product Designer',
+    tagline: document.getElementById('field-tagline')?.value.trim() || '',
+    bio: document.getElementById('field-bio')?.value.trim() || '',
+    location: document.getElementById('field-location')?.value.trim() || 'Kathmandu, Nepal',
+    email: document.getElementById('field-email')?.value.trim() || 'yogendrachaudhary2061@gmail.com',
+    phone: document.getElementById('field-phone')?.value.trim() || '',
+    linkedin: document.getElementById('field-linkedin')?.value.trim() || '',
+    resumeUrl: document.getElementById('field-resumeUrl')?.value.trim() || '',
+    sectionVisibility,
+    projects,
+    experience,
+    skills,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function updateAutoSaveStatus(state, info) {
+  const headerDot = document.getElementById('autosave-header-dot');
+  const headerText = document.getElementById('autosave-header-text');
+  const bannerDot = document.getElementById('autosave-banner-dot');
+  const bannerText = document.getElementById('autosave-banner-text');
+  const saveBtn = document.getElementById('save-btn');
+
+  if (state === 'saving') {
+    if (headerDot) headerDot.className = 'status-dot saving';
+    if (headerText) headerText.textContent = 'Saving to Database...';
+    if (bannerDot) bannerDot.className = 'status-dot saving';
+    if (bannerText) bannerText.textContent = 'Auto-Saving to Database...';
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg> Saving...';
+    }
+  } else if (state === 'saved') {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    if (headerDot) headerDot.className = 'status-dot active';
+    if (headerText) headerText.textContent = `Saved to Database (${time})`;
+    if (bannerDot) bannerDot.className = 'status-dot active';
+    if (bannerText) bannerText.textContent = `Auto-Save to Database: Synced (${time})`;
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Saved to Database';
+    }
+  } else if (state === 'error') {
+    if (headerDot) headerDot.className = 'status-dot error';
+    if (headerText) headerText.textContent = 'Database Save Failed';
+    if (bannerDot) bannerDot.className = 'status-dot error';
+    if (bannerText) bannerText.textContent = `Database Error: ${info || 'Failed'}`;
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Retry Save';
+    }
+  }
+}
+
+function triggerAutoSave(delay = 400) {
+  if (isLoadingContent) return;
+  updateAutoSaveStatus('saving');
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(async () => {
+    await performDatabaseSave(true);
+  }, delay);
+}
+
+async function performDatabaseSave(isAuto = true) {
+  if (isSaving) {
+    hasPendingSave = true;
+    return;
+  }
+  isSaving = true;
+  updateAutoSaveStatus('saving');
+
+  const payload = collectFormData();
+  let dbSuccess = false;
+
+  try {
+    // 1. Direct write to Firestore Database
+    if (db) {
+      await setDoc(doc(db, 'portfolio', 'main'), payload);
+      dbSuccess = true;
+    }
+    // 2. Also save to backend database (/api/content)
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) dbSuccess = true;
+    } catch(e) {}
+
+    // Dispatch cross-tab storage notification for instantaneous live preview sync
+    try {
+      localStorage.setItem('portfolio_content_override', JSON.stringify(payload));
+    } catch(e) {}
+
+    updateAutoSaveStatus('saved');
+    if (!isAuto) {
+      showToast('All changes saved to database successfully!', 'success');
+    }
+  } catch (err) {
+    console.error('Database save error:', err);
+    // If client SDK failed, ensure backend API saves
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        updateAutoSaveStatus('saved');
+        if (!isAuto) showToast('Saved to backend database!', 'success');
+        return;
+      }
+    } catch(e) {}
+
+    updateAutoSaveStatus('error', err.message);
+    if (!isAuto) {
+      showToast('Database save error: ' + err.message, 'error');
+    }
+  } finally {
+    isSaving = false;
+    if (hasPendingSave) {
+      hasPendingSave = false;
+      triggerAutoSave(100);
+    }
+  }
+}
+
+window.savePortfolioContent = async function(isAuto = false) {
+  await performDatabaseSave(isAuto);
+};
+
+function renderProjects(projects) {
+  const container = document.getElementById('projects-container');
+  container.innerHTML = '';
+  projects.forEach((p, idx) => {
+    const el = document.createElement('div');
+    el.className = 'item-card';
+    el.innerHTML = `
+      <div class="item-header">
+        <span class="item-number">Project #${idx + 1}</span>
+        <div class="item-controls">
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+            <input type="checkbox" class="proj-enabled" ${p.enabled !== false ? 'checked' : ''}>
+            <span>Visible</span>
+          </label>
+          <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeProject(${idx})">Delete</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Project Name / Heading</label>
+          <input type="text" class="proj-title" value="${escapeHtml(p.title || '')}">
+        </div>
+        <div class="form-group">
+          <label>Tags (Comma separated)</label>
+          <input type="text" class="proj-tags" value="${escapeHtml(p.tags || '')}">
+        </div>
+        <div class="form-group full">
+          <label>Subtitle / Description</label>
+          <textarea class="proj-subtitle">${escapeHtml(p.subtitle || '')}</textarea>
+        </div>
+        <div class="form-group full">
+          <label>Problem Statement</label>
+          <textarea class="proj-problem">${escapeHtml(p.problem || '')}</textarea>
+        </div>
+        <div class="form-group full">
+          <label>Impact / Solution</label>
+          <textarea class="proj-impact">${escapeHtml(p.impact || '')}</textarea>
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function renderExperience(exp) {
+  const container = document.getElementById('experience-container');
+  container.innerHTML = '';
+  exp.forEach((e, idx) => {
+    const el = document.createElement('div');
+    el.className = 'item-card';
+    el.innerHTML = `
+      <div class="item-header">
+        <span class="item-number">Entry #${idx + 1}</span>
+        <div class="item-controls">
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+            <input type="checkbox" class="exp-enabled" ${e.enabled !== false ? 'checked' : ''}>
+            <span>Visible</span>
+          </label>
+          <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeExperience(${idx})">Delete</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Company / Institution</label>
+          <input type="text" class="exp-company" value="${escapeHtml(e.company || '')}">
+        </div>
+        <div class="form-group">
+          <label>Role / Position</label>
+          <input type="text" class="exp-role" value="${escapeHtml(e.role || '')}">
+        </div>
+        <div class="form-group">
+          <label>Time Period</label>
+          <input type="text" class="exp-period" value="${escapeHtml(e.period || '')}">
+        </div>
+        <div class="form-group full">
+          <label>Details / Summary</label>
+          <textarea class="exp-details">${escapeHtml(e.details || '')}</textarea>
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function renderSkills(skills) {
+  const container = document.getElementById('skills-container');
+  container.innerHTML = '';
+  skills.forEach((s, idx) => {
+    const el = document.createElement('div');
+    el.className = 'item-card';
+    el.innerHTML = `
+      <div class="item-header">
+        <span class="item-number">Skill Block #${idx + 1}</span>
+        <div class="item-controls">
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+            <input type="checkbox" class="skill-enabled" ${s.enabled !== false ? 'checked' : ''}>
+            <span>Visible</span>
+          </label>
+          <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeSkill(${idx})">Delete</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Category Title</label>
+          <input type="text" class="skill-title" value="${escapeHtml(s.title || '')}">
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea class="skill-description">${escapeHtml(s.description || '')}</textarea>
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+window.signInAdmin = async function() {
+  if (!auth) return showToast('Firebase Auth not ready', 'error');
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+    showToast('Signed in successfully!', 'success');
+  } catch (err) {
+    console.error('Sign-in error:', err);
+    showToast('Sign-in failed: ' + err.message, 'error');
+  }
+};
+
+window.signOutAdmin = async function() {
+  if (!auth) return;
+  await signOut(auth);
+  showToast('Signed out', 'success');
+};
+
+window.addProjectItem = function() {
+  const container = document.getElementById('projects-container');
+  const count = container.children.length;
+  const p = { title: "New Project", subtitle: "", problem: "", impact: "", tags: "Product Design", enabled: true };
+  const el = document.createElement('div');
+  el.className = 'item-card';
+  el.innerHTML = `
+    <div class="item-header">
+      <span class="item-number">Project #${count + 1}</span>
+      <div class="item-controls">
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+          <input type="checkbox" class="proj-enabled" checked>
+          <span>Visible</span>
+        </label>
+        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove(); triggerAutoSave(0);">Delete</button>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Project Name / Heading</label>
+        <input type="text" class="proj-title" value="${p.title}">
+      </div>
+      <div class="form-group">
+        <label>Tags (Comma separated)</label>
+        <input type="text" class="proj-tags" value="${p.tags}">
+      </div>
+      <div class="form-group full">
+        <label>Subtitle / Description</label>
+        <textarea class="proj-subtitle"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Problem Statement</label>
+        <textarea class="proj-problem"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Impact / Solution</label>
+        <textarea class="proj-impact"></textarea>
+      </div>
+    </div>
+  `;
+  container.appendChild(el);
+  triggerAutoSave(0);
+};
+
+window.removeProject = function(idx) {
+  const cards = document.querySelectorAll('#projects-container .item-card');
+  if (cards[idx]) {
+    cards[idx].remove();
+    triggerAutoSave(0);
+  }
+};
+
+window.addExperienceItem = function() {
+  const container = document.getElementById('experience-container');
+  const count = container.children.length;
+  const el = document.createElement('div');
+  el.className = 'item-card';
+  el.innerHTML = `
+    <div class="item-header">
+      <span class="item-number">Entry #${count + 1}</span>
+      <div class="item-controls">
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+          <input type="checkbox" class="exp-enabled" checked>
+          <span>Visible</span>
+        </label>
+        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove(); triggerAutoSave(0);">Delete</button>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Company / Institution</label>
+        <input type="text" class="exp-company" value="Company / University">
+      </div>
+      <div class="form-group">
+        <label>Role / Position</label>
+        <input type="text" class="exp-role" value="Designer">
+      </div>
+      <div class="form-group">
+        <label>Time Period</label>
+        <input type="text" class="exp-period" value="2026 – Present">
+      </div>
+      <div class="form-group full">
+        <label>Details / Summary</label>
+        <textarea class="exp-details"></textarea>
+      </div>
+    </div>
+  `;
+  container.appendChild(el);
+  triggerAutoSave(0);
+};
+
+window.removeExperience = function(idx) {
+  const cards = document.querySelectorAll('#experience-container .item-card');
+  if (cards[idx]) {
+    cards[idx].remove();
+    triggerAutoSave(0);
+  }
+};
+
+window.addSkillItem = function() {
+  const container = document.getElementById('skills-container');
+  const count = container.children.length;
+  const el = document.createElement('div');
+  el.className = 'item-card';
+  el.innerHTML = `
+    <div class="item-header">
+      <span class="item-number">Skill Block #${count + 1}</span>
+      <div class="item-controls">
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+          <input type="checkbox" class="skill-enabled" checked>
+          <span>Visible</span>
+        </label>
+        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="this.closest('.item-card').remove(); triggerAutoSave(0);">Delete</button>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Category Title</label>
+        <input type="text" class="skill-title" value="New Skill">
+      </div>
+      <div class="form-group full">
+        <label>Description</label>
+        <textarea class="skill-description"></textarea>
+      </div>
+    </div>
+  `;
+  container.appendChild(el);
+  triggerAutoSave(0);
+};
+
+window.removeSkill = function(idx) {
+  const cards = document.querySelectorAll('#skills-container .item-card');
+  if (cards[idx]) {
+    cards[idx].remove();
+    triggerAutoSave(0);
+  }
+};
+
+window.switchTab = function(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  event.target.classList.add('active');
+  const target = document.getElementById('tab-' + tabName);
+  if (target) target.classList.add('active');
+};
+
+// Event delegation: Auto-save on ANY user interaction
+document.addEventListener('input', (e) => {
+  if (isLoadingContent) return;
+  if (e.target && e.target.matches('input[type="text"], input[type="email"], input[type="url"], textarea')) {
+    triggerAutoSave(400);
+  }
+});
+
+document.addEventListener('change', (e) => {
+  if (isLoadingContent) return;
+  if (e.target && e.target.matches('input[type="checkbox"], select, input[type="radio"]')) {
+    triggerAutoSave(0);
+  }
+});
+
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + type;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 4000);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+initFirebase();
+</script>
+</body>
+</html>
