@@ -1,22 +1,11 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    }
-  ],
   "rewrites": [
     { "source": "/api/content", "destination": "/api/content" },
     { "source": "/resume", "destination": "/assets/aistudio/Yogendra_Chaudhary_CV_cc247373.pdf" },
     { "source": "/vedic-sewa", "destination": "/perro-deepdive.html" },
     { "source": "/somtu", "destination": "/mercore.html" },
-    { "source": "/numira", "destination": "/perro.html" },
-    { "source": "/404", "destination": "/index.html" },
-    { "source": "/404.html", "destination": "/index.html" }
+    { "source": "/numira", "destination": "/perro.html" }
   ]
 }
