@@ -43,8 +43,8 @@ const pageAliases = new Map([
   ['/perro-deepdive', '/perro-deepdive.html'],
   ['/perro-deepdive.html', '/perro-deepdive.html'],
   ['/mercore', '/mercore.html'],
-  ['/mercore.html', '/mercore.html'],
-  ['/404', '/404.html'],
+  ['/404', '/index.html'],
+  ['/404.html', '/index.html'],
   ['/about', '/index.html'],
   ['/work', '/index.html'],
   ['/projects', '/index.html'],
@@ -185,14 +185,16 @@ const server = createServer(async (req, res) => {
       res.writeHead(400).end('Invalid path');
       return;
     }
+    if (decoded === '/404' || decoded === '/404.html') {
+      res.writeHead(302, { 'Location': '/', 'Cache-Control': 'no-cache' });
+      res.end();
+      return;
+    }
     const pathname = pageAliases.get(decoded) || decoded;
     if (await tryServe(pathname, req, res)) return;
-    // An actual 404 keeps the source site's 404 markup unchanged.
-    const fallback = resolve(root, '404.html');
-    const details = await stat(fallback);
-    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': details.size, 'Cache-Control': 'no-cache' });
-    if (req.method === 'HEAD') res.end();
-    else createReadStream(fallback).pipe(res);
+    // 404 screen removed so it never shows up: redirect missing routes to homepage
+    res.writeHead(302, { 'Location': '/', 'Cache-Control': 'no-cache' });
+    res.end();
   } catch (err) {
     console.error('[portfolio-server]', err);
     if (!res.headersSent) res.writeHead(500).end('Internal server error');
