@@ -1,0 +1,17 @@
+{
+  "name": "framer-portfolio-ai-studio-import",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Original published Framer portfolio, preserved byte-for-byte, served by a minimal Node.js project for Google AI Studio Build.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "build": "node scripts/build.mjs",
+    "verify": "node scripts/verify.mjs",
+    "test": "node scripts/test.mjs"
+  }
+}

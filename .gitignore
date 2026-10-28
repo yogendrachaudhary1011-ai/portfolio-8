@@ -1,0 +1,9 @@
+# New independent repository -- old Git history not included
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+node_modules/
+hts-cache/
+hts-log.txt
