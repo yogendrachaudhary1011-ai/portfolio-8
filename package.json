@@ -8,10 +8,13 @@
     "node": ">=18"
   },
   "scripts": {
-    "dev": "node server.mjs",
-    "start": "node server.mjs",
+    "dev": "node server.mjs --port 3000 --host 0.0.0.0",
+    "start": "node server.mjs --port 3000 --host 0.0.0.0",
     "build": "node scripts/build.mjs",
     "verify": "node scripts/verify.mjs",
     "test": "node scripts/test.mjs"
+  },
+  "dependencies": {
+    "firebase": "^13.1.0"
   }
 }

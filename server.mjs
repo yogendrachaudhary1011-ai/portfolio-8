@@ -6,7 +6,7 @@
  */
 import { createServer } from 'node:http';
 import { createReadStream } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { stat, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
@@ -31,10 +31,13 @@ const mime = {
   '.ttf': 'font/ttf',
   '.mp4': 'video/mp4',
   '.webm': 'video/webm',
+  '.pdf': 'application/pdf',
 };
 const pageAliases = new Map([
   ['/', '/index.html'],
   ['/index', '/index.html'],
+  ['/admin', '/admin.html'],
+  ['/admin.html', '/admin.html'],
   ['/perro', '/perro.html'],
   ['/perro-deepdive', '/perro-deepdive.html'],
   ['/mercore', '/mercore.html'],
@@ -47,12 +50,14 @@ function parseArgs() {
     const idx = args.indexOf(flag);
     return idx < 0 ? null : args[idx + 1];
   };
-  const rawPort = get('--port') || process.env.PORT || '3000';
+  // In Google AI Studio Build, dev server must always bind to port 3000 on 0.0.0.0.
+  // Never bind to 8080 which is occupied by internal nginx ingress in this environment.
+  const rawPort = get('--port') || (process.env.PORT && process.env.PORT !== '8080' ? process.env.PORT : '3000');
   const port = Number(rawPort);
   if (!Number.isInteger(port) || port < 0 || port > 65535) {
     throw new Error(`Invalid port ${rawPort}`);
   }
-  return { port, host: get('--host') || process.env.HOST || '0.0.0.0' };
+  return { port, host: get('--host') || '0.0.0.0' };
 }
 
 async function tryServe(pathname, req, res) {
@@ -77,13 +82,54 @@ async function tryServe(pathname, req, res) {
 }
 
 const server = createServer(async (req, res) => {
+  const raw = (req.url || '/').split(/[?#]/)[0];
+  const decoded = decodeURIComponent(raw);
+
+  if (decoded === '/api/content') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204).end();
+      return;
+    }
+
+    const dataFile = resolve(root, 'data/content.json');
+    if (req.method === 'GET' || req.method === 'HEAD') {
+      try {
+        const text = await readFile(dataFile, 'utf8');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        if (req.method === 'HEAD') res.end();
+        else res.end(text);
+        return;
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' }).end(JSON.stringify({ error: err.message }));
+        return;
+      }
+    } else if (req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', async () => {
+        try {
+          const parsed = JSON.parse(body);
+          await mkdir(resolve(root, 'data'), { recursive: true });
+          await writeFile(dataFile, JSON.stringify(parsed, null, 2), 'utf8');
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, message: 'Content saved successfully' }));
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'application/json' }).end(JSON.stringify({ error: e.message }));
+        }
+      });
+      return;
+    }
+  }
+
   if (!['GET', 'HEAD'].includes(req.method)) {
     res.writeHead(405, { Allow: 'GET, HEAD' }).end();
     return;
   }
   try {
-    const raw = (req.url || '/').split(/[?#]/)[0];
-    const decoded = decodeURIComponent(raw);
     // The browser's source HTML uses relative resource paths; keep their paths intact.
     if (!decoded.startsWith('/') || decoded.includes('\\') || decoded.includes('\0') || decoded.split('/').includes('..')) {
       res.writeHead(400).end('Invalid path');
