@@ -4,7 +4,7 @@
   "files": {
     ".gitignore": "4397baac0a870eb2d1bf780997a25fb05c216366731af88ed9f2a7966e656e10",
     ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "404.html": "ce01bc06b501b9cb717a3736c81d60e0b3ec9e73be438288648f6a38ac57f54b",
+    "404.html": "d314b310886bb59cc468b27f2ced5f98c84d9da0e1e96735c2ecf4894a52b1ff",
     "README.md": "b1e8e1e35740c74fca3560e300fb63ac1ad943e349341cbc08039cae9afe0f96",
     "framerusercontent.com/images/20slgdW8tgaJgCa6q9AgAQ3f30b433.png": "b4759b67e38d95371f02a21434fb53b77119db3fca6e8744d5761ce2c3205576",
     "framerusercontent.com/images/20slgdW8tgaJgCa6q9AgAQ3f30b8ea.png": "ad40b4b745f28757386e2b5897c6a0d2f34c4acb7517990a137b4fd045ed63fd",
@@ -189,9 +189,9 @@
     "framerusercontent.com/images/zLX7m9QFCVlnyxJFlFRbgYRcg00877.png": "b7827cc65eeebcf22a4ec7925cc419b3854af59e3854f28cdc4c392af1bb9943",
     "framerusercontent.com/images/zLX7m9QFCVlnyxJFlFRbgYRcg0ca1e.png": "9e31f10b2e03c2e0130f3d8dfa34e93ec10cacec817d27f722482d72e5560e1f",
     "framerusercontent.com/images/zW2Hprc9Ui03hgiOqLAcRWoU03b87.png": "496fd66d4ed0589d9720713a0fd14a80d215720e2314fee000f24c45deac8609",
-    "index.html": "21d150db26b7ef0714bfe579e20230781664796ab892869a38267b44a08f8f09",
-    "mercore.html": "57ec76348592e3bfc019db9023392acfef61baf8e8d7abf815f466236a1ccd2d",
-    "perro-deepdive.html": "6f90c99aeadc88027ee340dc8e774917b17ad79f157e1dfcba14aa44749620a4",
-    "perro.html": "e15480b9f3c269f56f3a6d3502d8b2b0637642f6332ad6e709cc043dbca1e419"
+    "index.html": "fe72187309bff9f8b8bcb95d737f816f86af2488fa3778805b956a8f25e22a36",
+    "mercore.html": "ee2a579b6e56d3306b394b30b3120692ab40a5540ef70bab4cce36b008247714",
+    "perro-deepdive.html": "dc7eceadc6b04a8d366bb5c5816c63ea22daf9a03aa7f1d04dc3c1629ab0f4a0",
+    "perro.html": "1cba6fdd77183f215a5b1ad84496abe3a6f3c1381acd030c553316b87e23e697"
   }
 }
